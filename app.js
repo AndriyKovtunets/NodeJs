@@ -1,43 +1,51 @@
-const fs = require('fs')
-//асинхронна функція читанян файлу метод 1
-/* fs.readFile('./test.txt', (err, data) => {
-	if (err) throw err
-	console.log(data.toString())
-}) */
-//асинхронна функція читанян файлу метод 2
-/* fs.readFile('./test.txt', 'utf8', (err, data) => {
-	if (err) throw err
-	console.log(data.toString())
-})
-//спочатку виведеться другий метод
-console.log('first print')
- */
-/* //асинхронне читання файлу створення та запис в іншу папку, але через вложеність виконається все успішно.
-fs.readFile('./test.txt', 'utf8', (err, data) => {
-	//if (err) throw err or
-	err ? console.log(err) : null
-	fs.mkdir('./files', () => {
-		fs.writeFile('./test2.txt', `${data} new text data`, () => {})
-	})
-}) */
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-//асинхронне читання файлу створення та запис в іншу папку, але через вложеність виконається все успішно.
-fs.readFile('./test.txt', 'utf8', (err, data) => {
-	err ? console.log(err) : null
-	fs.mkdirSync('./files', () => {})
-	fs.writeFileSync('./files/test2.txt', `${data} new text data`, err => {
-		err ? console.log(err) : null
-	})
-})
+const PORT = 3000;
 
-setTimeout(() => {
-	if (fs.existsSync('./files/test2.txt')) {
-		fs.unlink('./files/test2.txt', () => {})
-	}
-}, 4000)
+const server = http.createServer((req, res) => {
+  console.log('Server request');
 
-setTimeout(() => {
-	if (fs.existsSync('./file')) {
-		fs.rmdir('./files', () => {})
-	}
-}, 6000)
+  res.setHeader('Content-Type', 'text/html');
+
+  const createPath = (page) => path.resolve(__dirname, 'views', `${page}.html`);
+  let basePath = '';
+
+  switch(req.url) {
+    case '/':
+    case '/home':
+    case '/index.html':
+      basePath = createPath('index');
+      res.statusCode = 200;
+      break;
+    case '/about-us':
+      res.statusCode = 301;
+      res.setHeader('Location', '/contacts');
+      res.end();
+      break;
+    case '/contacts':
+      basePath = createPath('contacts');
+      res.statusCode = 200;
+      break;
+    default:
+      basePath = createPath('error');
+      res.statusCode = 404;
+      break;
+  }
+
+  fs.readFile(basePath, (err, data) => {
+    if (err) {
+      console.log(err);
+      res.statusCode = 500;
+      res.end();
+    } else {
+      res.write(data);
+      res.end();
+    }
+  });
+});
+
+server.listen(PORT, 'localhost', (error) => {
+  error ? console.log(error) : console.log(`listening port ${PORT}`);
+});
