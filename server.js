@@ -1,12 +1,22 @@
 const express = require('express')
 const path = require('path')
 const morgan = require('morgan')
+const mongoose = require('mongoose')
+const Post = require('./models/post')
 
 const app = express()
 
 app.set('view engine', 'ejs')
 
 const PORT = 3000
+
+const db =
+	'mongodb+srv://andriyko2009:bU9VDfK4LznjK52@mycluster.jkowlfo.mongodb.net/node-blog?retryWrites=true&w=majority'
+
+mongoose
+	.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+	.then(res => console.log('Connected to DB'))
+	.catch(error => console.log(error))
 
 const createPath = page => path.resolve(__dirname, 'ejs-views', `${page}.ejs`)
 
@@ -15,6 +25,8 @@ app.listen(PORT, 'localhost', error => {
 })
 //використовуємо middleware модуль  HTTP request logger middleware for node.js
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
+
+app.use(express.urlencoded({ extended: false }))
 
 //middleware method for access to folder for client
 app.use(express.static('styles'))
@@ -43,12 +55,41 @@ app.get('about-us', (req, res) => {
 
 app.get('/posts/:id', (req, res) => {
 	const title = 'Post'
-	res.render(createPath('post'), { title })
+	const post = {
+		id: '1',
+		text: 'Lorem ipsum dolor',
+		title: 'Post title',
+		date: '05.05.2021',
+		author: 'Andrii',
+	}
+	res.render(createPath('post'), { title, post })
 })
 
 app.get('/posts', (req, res) => {
 	const title = 'Posts'
-	res.render(createPath('posts'), { title })
+	const posts = [
+		{
+			id: '1',
+			text: 'Lorem ipsum dolor',
+			title: 'Post title',
+			date: '05.05.2021',
+			author: 'Andrii',
+		},
+	]
+	res.render(createPath('posts'), { title, posts })
+})
+
+app.post('/add-post', (req, res) => {
+	const { title, author, text } = req.body
+	const post = {
+		id: new Date(),
+		date: new Date().toLocaleDateString(),
+		title,
+		author,
+		text,
+	}
+	res.render(createPath('post'), { post, title })
+	//res.send(req.body)
 })
 
 app.get('/add-post', (req, res) => {
