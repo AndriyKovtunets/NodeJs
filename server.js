@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const methodOverride = require('method-override')
 const Post = require('./models/post')
 const Contact = require('./models/contact')
 
@@ -32,6 +33,9 @@ app.use(express.urlencoded({ extended: false }))
 //middleware method for access to folder for client
 app.use(express.static('styles'))
 
+// middleware method for Override method post to put in form
+app.use(methodOverride('_method'))
+
 app.get('/', (req, res) => {
 	const title = 'Home'
 	// res.send('<h1>Hello world<h1>')
@@ -55,14 +59,23 @@ app.get('about-us', (req, res) => {
 
 app.get('/posts/:id', (req, res) => {
 	const title = 'Post'
-	const post = {
-		id: '1',
-		text: 'Lorem ipsum dolor',
-		title: 'Post title',
-		date: '05.05.2021',
-		author: 'Andrii',
-	}
-	res.render(createPath('post'), { title, post })
+	Post.findById(req.params.id)
+		.sort({ createdAt: -1 })
+		.then(post => res.render(createPath('post'), { post, title }))
+		.catch(error => {
+			console.log(error)
+			res.render(createPath('error'), { title: 'Error' })
+		})
+})
+
+app.delete('/posts/:id', (req, res) => {
+	const title = 'Post'
+	Post.findByIdAndDelete(req.params.id)
+		.then(result => res.sendStatus(200))
+		.catch(error => {
+			console.log(error)
+			res.render(createPath('error'), { title: 'Error' })
+		})
 })
 
 app.get('/posts', (req, res) => {
@@ -76,11 +89,31 @@ app.get('/posts', (req, res) => {
 		})
 })
 
+app.get('/edit/:id', (req, res) => {
+	const title = 'Edit Post'
+	Post.findById(req.params.id)
+		.then(post => res.render(createPath('edit-post'), { post, title }))
+		.catch(error => {
+			console.log(error)
+			res.render(createPath('error'), { title: 'Error' })
+		})
+})
+
+app.put('/edit/:id', (req, res) => {
+	const { title, author, text } = req.body
+	const { id } = req.params
+	Post.findByIdAndUpdate(id, { title, author, text })
+		.then(post => res.redirect(`/posts/${id}`))
+		.catch(error => {
+			console.log(error)
+			res.render(createPath('error'), { title: 'Error' })
+		})
+})
+
 app.post('/add-post', (req, res) => {
 	const { title, author, text } = req.body
 	const post = new Post({ title, author, text })
-	post
-		.save()
+	Post.save()
 		.then(result => res.redirect('/posts'))
 		.catch(error => {
 			console.log(error)
