@@ -20,6 +20,9 @@
 					<button class="btn-delete" data-id="<%= id %>">
 						<i class="fas fa-trash-alt" data-id="<%= id %>"></i>
 					</button>
+					<button class="btn-duplicate" data-idd="<%= id %>">
+						<i class="fas fa-solid fa-copy" data-idd="<%= id %>"></i>
+					</button>
 				</article>
 			</li>
 			<% }) %> <% } %>
@@ -29,9 +32,22 @@
 			document.addEventListener('click', e => {
 				const id = e.target?.dataset?.id || null
 				if (id) {
-					alert('ggg')
+					alert('delete')
 					fetch(`/posts/${id}`, {
 						method: 'DELETE',
+					}).then(() => {
+						window.location.reload()
+					})
+				}
+			})
+		</script>
+		<script>
+			document.addEventListener('click', e => {
+				const id = e.target?.dataset?.idd || null
+				if (id) {
+					alert('duplicate')
+					fetch(`/posts/${id}`, {
+						method: 'POST',
 					}).then(() => {
 						window.location.reload()
 					})

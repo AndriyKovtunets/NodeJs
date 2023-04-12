@@ -155,6 +155,7 @@ textarea {
 }
 
 .btn-edit,
+.btn-duplicate,
 .btn-delete {
 	position: absolute;
 	top: 10px;
@@ -162,7 +163,7 @@ textarea {
 	padding: 10px 15px;
 	cursor: pointer;
 	border: 1px solid #000;
-	background-color: rgba(0, 0, 0, 0.4);
+	background-color: rgba(0, 0, 0, 0.6);
 	color: #fff;
 	width: 48px;
 	border-radius: 3px;
@@ -170,9 +171,10 @@ textarea {
 	box-sizing: border-box;
 }
 
-.btn-edit,
+.btn-edit:hover,
+.btn-duplicate:hover,
 .btn-delete:hover {
-	background-color: rgba(0, 0, 0, 0.6);
+	background-color: rgba(0, 0, 0, 0.4);
 }
 
 .btn-edit {
@@ -181,4 +183,8 @@ textarea {
 
 .btn-delete {
 	right: 10px;
+}
+
+.btn-duplicate {
+	right: 65px;
 }

@@ -21,6 +21,18 @@ const deletePost = (req, res) => {
 		.catch(error => handleError(res, error))
 }
 
+const duplicatePost = (req, res) => {
+	const duplicatePost = Post.findById(req.params.id)
+		.then(post => {
+			const { title, author, text } = post
+			new Post({ title, author, text })
+				.save()
+				.then(result => res.redirect('/posts'))
+				.catch(error => handleError(res, error))
+		})
+		.catch(error => handleError(res, error))
+}
+
 const getEditPost = (req, res) => {
 	const title = 'Edit post'
 	Post.findById(req.params.id)
@@ -31,7 +43,7 @@ const getEditPost = (req, res) => {
 const editPost = (req, res) => {
 	const { title, author, text } = req.body
 	const { id } = req.params
-	Post.findByIdAndUpdate(req.params.id, { title, author, text })
+	Post.findByIdAndUpdate(req.params.id, { title, author, text }, { new: true }) //третій агрумент для того щоб ф-ція вертала змінене значення
 		.then(result => res.redirect(`/posts/${id}`))
 		.catch(error => handleError(res, error))
 }
@@ -61,6 +73,7 @@ const addPost = (req, res) => {
 module.exports = {
 	getPost,
 	deletePost,
+	duplicatePost,
 	getEditPost,
 	editPost,
 	getPosts,
